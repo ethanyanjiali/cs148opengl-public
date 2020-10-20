@@ -32,6 +32,8 @@ private:
     std::shared_ptr<class Light> pointLight;
 
     std::vector<glm::vec4> vertexPositions;
+    
+    GLuint shaderProgramId;
 };
 
 #endif

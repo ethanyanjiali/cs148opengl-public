@@ -3,6 +3,10 @@
 #include "common/Utility/Mesh/Simple/PrimitiveCreator.h"
 #include "common/Utility/Mesh/Loading/MeshLoader.h"
 #include <cmath>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+
 
 namespace
 {
@@ -87,15 +91,46 @@ void Assignment2::HandleWindowResize(float x, float y)
     Application::HandleWindowResize(x, y);
 }
 
+std::string ReadShaderFile(std::string filename)
+{
+    const std::string shaderFilename = std::string(STRINGIFY(SHADER_PATH)) + "/" + filename;
+    
+    std::ifstream f(shaderFilename);
+    std::string str;
+    if (f) {
+        std::ostringstream ss;
+        ss << f.rdbuf();
+        str = ss.str();
+    }
+    return str;
+}
+
+void LoadAndCompileShader(GLuint shaderId, std::string shaderString)
+{
+    const char *c_str = shaderString.c_str();
+    glShaderSource(shaderId, 1, &c_str, NULL);
+    glCompileShader(shaderId);
+}
+
 void Assignment2::SetupExample1()
 {
     // Insert "Load and Compile Shaders" code here.
+    std::string vertexShader = ReadShaderFile("hw2/hw2.vert");
+    std::string fragmentShader = ReadShaderFile("hw2/hw2.frag");
 
     // Checkpoint 1.
     // Modify this part to contain your vertex shader ID, fragment shader ID, and shader program ID.
-    const GLuint vertexShaderId = 0;
-    const GLuint fragmentShaderId = 0;
-    const GLuint shaderProgramId = 0;
+    const GLuint vertexShaderId = glCreateShader(GL_VERTEX_SHADER);
+    const GLuint fragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
+    
+    LoadAndCompileShader(vertexShaderId, vertexShader);
+    LoadAndCompileShader(fragmentShaderId, fragmentShader);
+    
+    shaderProgramId = glCreateProgram();
+    
+    glAttachShader(shaderProgramId, vertexShaderId);
+    glAttachShader(shaderProgramId, fragmentShaderId);
+    glLinkProgram(shaderProgramId);
 
     // DO NOT EDIT OR REMOVE THE CODE IN THIS SECTION
     if (!VerifyShaderCompile(vertexShaderId) || !VerifyShaderCompile(fragmentShaderId) || !VerifyProgramLink(shaderProgramId)) {
