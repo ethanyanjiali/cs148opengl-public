@@ -14,7 +14,97 @@ void AddTriangleIndices(const glm::uvec3& triangle, RenderingObject::IndexArray&
 
 std::shared_ptr<RenderingObject> CreateCube(std::shared_ptr<ShaderProgram> inputShader, float sideLength)
 {
-    return nullptr;
+    std::unique_ptr<RenderingObject::PositionArray> vertexPositions = make_unique<RenderingObject::PositionArray>();
+    // bottom 4 vertices
+    vertexPositions->emplace_back(0.f, 0, 0.f, 1.f);
+    vertexPositions->emplace_back(1.f, 0, 0.f, 1.f);
+    vertexPositions->emplace_back(0.f, 0, 1.f, 1.f);
+    vertexPositions->emplace_back(1.f, 0, 1.f, 1.f);
+    
+    // top 4 vertices
+    vertexPositions->emplace_back(0.f, 1.f, 0.f, 1.f);
+    vertexPositions->emplace_back(1.f, 1.f, 0.f, 1.f);
+    vertexPositions->emplace_back(0.f, 1.f, 1.f, 1.f);
+    vertexPositions->emplace_back(1.f, 1.f, 1.f, 1.f);
+    
+    // front 4 vertices
+    vertexPositions->emplace_back(0.f, 1.f, 1.f, 1.f);
+    vertexPositions->emplace_back(1.f, 1.f, 1.f, 1.f);
+    vertexPositions->emplace_back(0.f, 0.f, 1.f, 1.f);
+    vertexPositions->emplace_back(1.f, 0.f, 1.f, 1.f);
+    
+    // right 4 vertices
+    vertexPositions->emplace_back(0.f, 0.f, 0.f, 1.f);
+    vertexPositions->emplace_back(0.f, 0.f, 1.f, 1.f);
+    vertexPositions->emplace_back(0.f, 1.f, 0.f, 1.f);
+    vertexPositions->emplace_back(0.f, 1.f, 1.f, 1.f);
+    
+    // left 4 vertices
+    vertexPositions->emplace_back(1.f, 0.f, 0.f, 1.f);
+    vertexPositions->emplace_back(1.f, 0.f, 1.f, 1.f);
+    vertexPositions->emplace_back(1.f, 1.f, 0.f, 1.f);
+    vertexPositions->emplace_back(1.f, 1.f, 1.f, 1.f);
+    
+    // back 4 vertices
+    vertexPositions->emplace_back(1.f, 0.f, 0.f, 1.f);
+    vertexPositions->emplace_back(1.f, 1.f, 0.f, 1.f);
+    vertexPositions->emplace_back(0.f, 0.f, 0.f, 1.f);
+    vertexPositions->emplace_back(0.f, 1.f, 0.f, 1.f);
+
+    std::unique_ptr<RenderingObject::NormalArray> vertexNormals = make_unique<RenderingObject::NormalArray>();
+    vertexNormals->emplace_back(0.f, -1.f, 0.f);
+    vertexNormals->emplace_back(0.f, -1.f, 0.f);
+    vertexNormals->emplace_back(0.f, -1.f, 0.f);
+    vertexNormals->emplace_back(0.f, -1.f, 0.f);
+    
+    vertexNormals->emplace_back(0.f, 1.f, 0.f);
+    vertexNormals->emplace_back(0.f, 1.f, 0.f);
+    vertexNormals->emplace_back(0.f, 1.f, 0.f);
+    vertexNormals->emplace_back(0.f, 1.f, 0.f);
+    
+    vertexNormals->emplace_back(0.f, 0.f, 1.f);
+    vertexNormals->emplace_back(0.f, 0.f, 1.f);
+    vertexNormals->emplace_back(0.f, 0.f, 1.f);
+    vertexNormals->emplace_back(0.f, 0.f, 1.f);
+    
+    vertexNormals->emplace_back(1.f, 0.f, 0.f);
+    vertexNormals->emplace_back(1.f, 0.f, 0.f);
+    vertexNormals->emplace_back(1.f, 0.f, 0.f);
+    vertexNormals->emplace_back(1.f, 0.f, 0.f);
+    
+    vertexNormals->emplace_back(-1.f, 0.f, 0.f);
+    vertexNormals->emplace_back(-1.f, 0.f, 0.f);
+    vertexNormals->emplace_back(-1.f, 0.f, 0.f);
+    vertexNormals->emplace_back(-1.f, 0.f, 0.f);
+    
+    vertexNormals->emplace_back(0.f, 0.f, -1.f);
+    vertexNormals->emplace_back(0.f, 0.f, -1.f);
+    vertexNormals->emplace_back(0.f, 0.f, -1.f);
+    vertexNormals->emplace_back(0.f, 0.f, -1.f);
+
+    RenderingObject::IndexArray vertexIndices = {
+        0, 2, 1, // bottom triangle 1
+        1, 2, 3, // bottom triangle 2
+        4, 6, 5, // top triangle 1
+        5, 6, 7, // top triangle 2
+        8, 10, 9, // front triangle 1
+        9, 10, 11, // front triangle 2
+        12, 14, 13, // right triangle 1
+        13, 14, 15, // right triangle 2
+        16, 18, 17, // left triangle 1
+        17, 18, 19, // left triangle 2
+        20, 22, 21, // back triangle 1
+        21, 22, 23, // back triangle 2
+
+    };
+
+    std::shared_ptr<RenderingObject> newObj = std::make_shared<RenderingObject>(std::move(inputShader),
+        std::move(vertexPositions),
+        make_unique<RenderingObject::IndexArray>(std::move(vertexIndices)),
+        std::move(vertexNormals)
+    );
+
+    return newObj;
 }
 
 std::shared_ptr<RenderingObject> CreatePlane(std::shared_ptr<ShaderProgram> inputShader)  

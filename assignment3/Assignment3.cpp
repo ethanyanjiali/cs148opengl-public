@@ -34,7 +34,12 @@ void Assignment3::SetupScene()
 
 void Assignment3::SetupCamera()
 {
-    camera->Translate(glm::vec3(0.f, 0.f, 10.f));
+    // Example 1
+    camera->Translate(glm::vec3(1.5f, 2.f, 3.f));
+    camera->Rotate(glm::vec3(1.f, 0.f, 0.f), -0.3f);
+    // Example 2
+    // camera->Translate(glm::vec3(0.f, 0.5f, 0.3f));
+    // camera->Rotate(glm::vec3(1.f, 0.f, 0.f), -0.6f);
 }
 
 void Assignment3::HandleInput(SDL_Keysym key, Uint32 state, Uint8 repeat, double timestamp, double deltaTime)
@@ -121,10 +126,11 @@ void Assignment3::SetupExample1()
     shader->SetDiffuse(glm::vec4(0.8f, 0.8f, 0.8f, 1.f));
     shader->SetAmbient(glm::vec4(0.5f));
 
-    std::shared_ptr<RenderingObject> sphereTemplate = PrimitiveCreator::CreateIcoSphere(shader, 5.f, 4);
+    // std::shared_ptr<RenderingObject> shapeTemplate = PrimitiveCreator::CreateIcoSphere(shader, 5.f, 4);
+    std::shared_ptr<RenderingObject> shapeTemplate = PrimitiveCreator::CreateCube(shader, .3f);
 
     // Give a R/G/B color to each vertex to visualize the sphere.
-    auto totalVertices = sphereTemplate->GetTotalVertices();
+     auto totalVertices = shapeTemplate->GetTotalVertices();
 
     std::unique_ptr<RenderingObject::ColorArray> vertexColors = make_unique<RenderingObject::ColorArray>();
     vertexColors->reserve(totalVertices);
@@ -132,16 +138,16 @@ void Assignment3::SetupExample1()
     for (decltype(totalVertices) i = 0; i < totalVertices; ++i) {
         vertexColors->emplace_back(0.5f, 0.5f, 0.5f, 1.f);
     }
-    sphereTemplate->SetVertexColors(std::move(vertexColors));
+    shapeTemplate->SetVertexColors(std::move(vertexColors));
 
-    sceneObject = std::make_shared<SceneObject>(sphereTemplate);
+    sceneObject = std::make_shared<SceneObject>(shapeTemplate);
     scene->AddSceneObject(sceneObject);
 
     std::unique_ptr<LightProperties> lightProperties = make_unique<LightProperties>();
     lightProperties->diffuseColor = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
 
     pointLight = std::make_shared<Light>(std::move(lightProperties));
-    pointLight->SetPosition(glm::vec3(0.f, 0.f, 10.f));
+    pointLight->SetPosition(glm::vec3(1.5f, 2.f, 1.5f));
     scene->AddLight(pointLight);
 }
 
@@ -163,7 +169,7 @@ void Assignment3::SetupExample2()
     shader->SetDiffuse(glm::vec4(0.8f, 0.8f, 0.8f, 1.f));
     shader->SetAmbient(glm::vec4(0.5f));
 
-    std::vector<std::shared_ptr<RenderingObject>> meshTemplate = MeshLoader::LoadMesh(shader, "outlander/Model/Outlander_Model.obj");
+    std::vector<std::shared_ptr<RenderingObject>> meshTemplate = MeshLoader::LoadMesh(shader, "whiskey/Model/old_fashioned.obj");
     if (meshTemplate.empty()) {
         std::cerr << "ERROR: Failed to load the model. Check your paths." << std::endl;
         return;

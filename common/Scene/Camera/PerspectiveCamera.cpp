@@ -1,7 +1,7 @@
 #include "common/Scene/Camera/PerspectiveCamera.h"
 
 PerspectiveCamera::PerspectiveCamera(float inFov, float inAR):
-    fov(inFov), aspectRatio(inAR), zNear(1.f), zFar(200.f)
+    fov(inFov), aspectRatio(inAR), zNear(0.01f), zFar(200.f)
 {
 }
 
