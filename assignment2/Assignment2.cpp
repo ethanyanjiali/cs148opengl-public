@@ -158,7 +158,10 @@ void Assignment2::SetupExample1()
 void Assignment2::Tick(double deltaTime)
 {
     // Insert "Send Buffers to the GPU" and "Slightly-More Advanced Shaders" code here.
+    time += deltaTime;
     glUseProgram(shaderProgramId);
+    const GLuint location = glGetUniformLocation(shaderProgramId, "inputTime");
+    glUniform1f(location, time);
     glBindVertexArray(vao);
     glDrawArrays(GL_TRIANGLES, 0, vertexPositions.size());
 }
