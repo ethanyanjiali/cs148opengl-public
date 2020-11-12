@@ -36,14 +36,45 @@ uniform int lightingType;
 
 const float PI = 3.1415926535;
 
+float clampedDot(vec4 A, vec4 B)
+{
+    return max(0, dot(A,B));
+}
+
+float computeG1(vec4 N, vec4 v, float k)
+{
+    return clampedDot(N, v) / (clampedDot(N, v) * (1 - k) + k);
+}
+
 vec4 pointLightSubroutine(vec4 N, vec4 worldPosition, vec3 worldNormal)
 {
     // Direction from the surface to the point light
     vec4 L = normalize(pointLight.pointPosition - vertexWorldPosition);
-    float NdL = max(0, dot(N,L));
+    float NdL = clampedDot(N,L);
+//    vec4 cFinal = vec4(NdL);
 
     // Insert code for Section 3.2 here.
-    return vec4(NdL);
+    vec4 V = normalize(cameraPosition - vertexWorldPosition);
+    vec4 H = normalize(L + V);
+    vec4 cDiff = (1 - material.matMetallic) * fragmentColor;
+    vec4 cSpec = mix(0.08 * material.matSpecular, fragmentColor, material.matMetallic);
+    float alpha = material.matRoughness * material.matRoughness;
+
+    vec4 d = cDiff / PI;
+    vec4 brdf = d * genericLight.diffuseColor;
+    
+    float D = pow(alpha, 2) / (PI * pow(pow(clampedDot(N, H), 2) * (pow(alpha, 2) - 1.0) + 1.0, 2));
+    float k = pow(material.matRoughness + 1.0, 2) / 8.0;
+    float G = computeG1(N, L, k) * computeG1(N, V, k);
+    vec4 F = cSpec + (1 - cSpec) * pow(2, (-5.55473 * clampedDot(V,H) - 6.98316) * clampedDot(V, H));
+    float denom = 4.0 * clampedDot(N, L) * clampedDot(N, V);
+    if(denom != 0.0) {
+        vec4 s = D * F * G / denom;
+        brdf = brdf + s * genericLight.specularColor;
+    }
+    vec4 cFinal = vec4(NdL) * brdf;
+
+    return cFinal;
 }
 
 vec4 directionalLightSubroutine(vec4 N, vec4 worldPosition, vec3 worldNormal)
