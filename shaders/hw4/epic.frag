@@ -46,19 +46,21 @@ float computeG1(vec4 N, vec4 v, float k)
     return clampedDot(N, v) / (clampedDot(N, v) * (1 - k) + k);
 }
 
-vec4 computeColorGivenLightDir(vec4 L, vec4 N, vec4 worldPosition, vec3 worldNormal)
+vec4 computeDiffuseBRDF(vec4 L, vec4 N, vec4 worldPosition, vec3 worldNormal, vec4 diffuseColor)
 {
-    float NdL = clampedDot(N,L);
+    vec4 cDiff = (1 - material.matMetallic) * fragmentColor;
+    vec4 d = cDiff / PI;
+    vec4 brdf = d * diffuseColor;
+    return brdf;
+}
 
-    // Insert code for Section 3.2 here.
+vec4 computeSpecularBRDF(vec4 L, vec4 N, vec4 worldPosition, vec3 worldNormal, vec4 specularColor)
+{
+    vec4 brdf = vec4(0.0, 0.0, 0.0, 0.0);
     vec4 V = normalize(cameraPosition - vertexWorldPosition);
     vec4 H = normalize(L + V);
-    vec4 cDiff = (1 - material.matMetallic) * fragmentColor;
     vec4 cSpec = mix(0.08 * material.matSpecular, fragmentColor, material.matMetallic);
     float alpha = material.matRoughness * material.matRoughness;
-
-    vec4 d = cDiff / PI;
-    vec4 brdf = d * genericLight.diffuseColor;
     
     float D = pow(alpha, 2) / (PI * pow(pow(clampedDot(N, H), 2) * (pow(alpha, 2) - 1.0) + 1.0, 2));
     float k = pow(material.matRoughness + 1.0, 2) / 8.0;
@@ -67,31 +69,47 @@ vec4 computeColorGivenLightDir(vec4 L, vec4 N, vec4 worldPosition, vec3 worldNor
     float denom = 4.0 * clampedDot(N, L) * clampedDot(N, V);
     if(denom != 0.0) {
         vec4 s = D * F * G / denom;
-        brdf = brdf + s * genericLight.specularColor;
+        brdf = brdf + s * specularColor;
     }
-    vec4 cFinal = vec4(NdL) * brdf;
-
-    return cFinal;
+    return brdf;
 }
 
 vec4 pointLightSubroutine(vec4 N, vec4 worldPosition, vec3 worldNormal)
 {
     // Direction from the surface to the point light
     vec4 L = normalize(pointLight.pointPosition - vertexWorldPosition);
-    return computeColorGivenLightDir(L, N, worldPosition, worldNormal);
+    float NdL = clampedDot(N,L);
+    
+    // Insert code for Section 3.2 here.
+    vec4 diffuseBRDF = computeDiffuseBRDF(L, N, worldPosition, worldNormal, genericLight.diffuseColor);
+    vec4 specularBRDF = computeSpecularBRDF(L, N, worldPosition, worldNormal, genericLight.specularColor);
+    vec4 cFinal = vec4(NdL) * (diffuseBRDF + specularBRDF);
+    
+    return cFinal;
 }
 
 vec4 directionalLightSubroutine(vec4 N, vec4 worldPosition, vec3 worldNormal)
 {
     // Insert code for Section 3.3 here.
     vec4 L = -genericLight.directionalLightDir;
-    return computeColorGivenLightDir(L, N, worldPosition, worldNormal);
+    float NdL = clampedDot(N,L);
+    
+    vec4 diffuseBRDF = computeDiffuseBRDF(L, N, worldPosition, worldNormal, genericLight.diffuseColor);
+    vec4 specularBRDF = computeSpecularBRDF(L, N, worldPosition, worldNormal, genericLight.specularColor);
+    vec4 cFinal = vec4(NdL) * (diffuseBRDF + specularBRDF);
+
+    return cFinal;
 }
 
 vec4 hemisphereLightSubroutine(vec4 N, vec4 worldPosition, vec3 worldNormal)
 {
     // Insert code for Section 3.4 here.
-    return vec4(0.0);
+    vec4 L = N;
+    float NdL = clampedDot(N,L);
+    vec4 cLight = mix(genericLight.diffuseColor, genericLight.specularColor, clamp(dot(N, vec4(0.0, 1.0, 0.0, 1.0)) * 0.5 + 0.5, 0.0, 1.0));
+    vec4 diffuseBRDF = computeDiffuseBRDF(L, N, worldPosition, worldNormal, cLight);
+    vec4 cFinal = vec4(NdL) * diffuseBRDF;
+    return cFinal;
 }
 
 vec4 spotLightSubroutine(vec4 N, vec4 worldPosition, vec3 worldNormal)
