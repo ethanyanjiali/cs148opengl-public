@@ -115,7 +115,33 @@ vec4 hemisphereLightSubroutine(vec4 N, vec4 worldPosition, vec3 worldNormal)
 vec4 spotLightSubroutine(vec4 N, vec4 worldPosition, vec3 worldNormal)
 {
     // Insert code for Section 3.5 here.
-    return vec4(0.0);
+    vec4 L = normalize(pointLight.pointPosition - vertexWorldPosition);
+    vec4 lDir = genericLight.directionalLightDir;
+    float NdL = clampedDot(N,L);
+
+    float cosTheta = - dot(L, lDir);
+    float cosTheta1 = cos(genericLight.spotInnerConeAngleDegrees * PI / 180.0);
+    float cosTheta2 = cos(genericLight.spotOuterConeAngleDegrees * PI / 180.0);
+    
+    float gamma = 1.0;
+    if (cosTheta < cosTheta2)
+    {
+        gamma = 0.0;
+    }
+    else if (cosTheta > cosTheta1)
+    {
+        gamma = 1.0;
+    }
+    else
+    {
+        gamma = (cosTheta - cosTheta2)/ (cosTheta1 - cosTheta2);
+    }
+    
+    // Insert code for Section 3.2 here.
+    vec4 diffuseBRDF = computeDiffuseBRDF(L, N, worldPosition, worldNormal, genericLight.diffuseColor * gamma);
+    vec4 specularBRDF = computeSpecularBRDF(L, N, worldPosition, worldNormal, genericLight.specularColor * gamma);
+    vec4 cFinal = vec4(NdL) * (diffuseBRDF + specularBRDF);
+    return cFinal;
 }
 
 vec4 globalLightSubroutine(vec4 worldPosition, vec3 worldNormal)
