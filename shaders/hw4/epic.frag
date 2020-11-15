@@ -46,12 +46,9 @@ float computeG1(vec4 N, vec4 v, float k)
     return clampedDot(N, v) / (clampedDot(N, v) * (1 - k) + k);
 }
 
-vec4 pointLightSubroutine(vec4 N, vec4 worldPosition, vec3 worldNormal)
+vec4 computeColorGivenLightDir(vec4 L, vec4 N, vec4 worldPosition, vec3 worldNormal)
 {
-    // Direction from the surface to the point light
-    vec4 L = normalize(pointLight.pointPosition - vertexWorldPosition);
     float NdL = clampedDot(N,L);
-//    vec4 cFinal = vec4(NdL);
 
     // Insert code for Section 3.2 here.
     vec4 V = normalize(cameraPosition - vertexWorldPosition);
@@ -77,10 +74,18 @@ vec4 pointLightSubroutine(vec4 N, vec4 worldPosition, vec3 worldNormal)
     return cFinal;
 }
 
+vec4 pointLightSubroutine(vec4 N, vec4 worldPosition, vec3 worldNormal)
+{
+    // Direction from the surface to the point light
+    vec4 L = normalize(pointLight.pointPosition - vertexWorldPosition);
+    return computeColorGivenLightDir(L, N, worldPosition, worldNormal);
+}
+
 vec4 directionalLightSubroutine(vec4 N, vec4 worldPosition, vec3 worldNormal)
 {
     // Insert code for Section 3.3 here.
-    return vec4(0.0);
+    vec4 L = -genericLight.directionalLightDir;
+    return computeColorGivenLightDir(L, N, worldPosition, worldNormal);
 }
 
 vec4 hemisphereLightSubroutine(vec4 N, vec4 worldPosition, vec3 worldNormal)
